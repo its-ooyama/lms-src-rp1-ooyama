@@ -41,6 +41,7 @@ public class AttendanceController {
 	 * @param lmsUserId
 	 * @param courseId
 	 * @param model
+	 * @param session
 	 * @return 勤怠管理画面
 	 * @throws ParseException
 	 */
@@ -51,25 +52,25 @@ public class AttendanceController {
 		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
 				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
-		
-		//勤怠情報の未入力の判定結果を取得
+
+		//大山忠資-Task.25
 		//セッションのログイン情報を取得
 		loginUserDto = (LoginUserDto) session.getAttribute("loginUserDto");
 		//ログイン情報からlmsユーザーIDを取得
 		Integer lmsUserId = loginUserDto.getLmsUserId();
 		//現在の日付を取得
-        Date trainingDate = attendanceUtil.getTrainingDate();
-        //削除フラグを0に指定
-        short deleteFlg = 0;
-        //勤怠の未入力件数を取得
-        Integer notEnterCount = studentAttendanceService.getNotEnterCount(lmsUserId, deleteFlg, trainingDate);
-      //勤怠の未入力がある場合はture,ない場合はfalse
-        if(notEnterCount>0) {
-        	model.addAttribute("notEnter", true);
-        	
-        }else {
-        	model.addAttribute("notEnter", false);
-        }
+		Date trainingDate = attendanceUtil.getTrainingDate();
+		//削除フラグをオフにする
+		short deleteFlg = Constants.DB_FLG_FALSE;
+		//勤怠の未入力件数を取得
+		Integer notEnterCount = studentAttendanceService.getNotEnterCount(lmsUserId, deleteFlg, trainingDate);
+		//勤怠の未入力がある場合はture,ない場合はfalse
+		if (notEnterCount > 0) {
+			model.addAttribute("notEnter", true);
+
+		} else {
+			model.addAttribute("notEnter", false);
+		}
 
 		return "attendance/detail";
 	}

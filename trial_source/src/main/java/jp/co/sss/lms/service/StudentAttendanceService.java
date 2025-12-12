@@ -333,17 +333,21 @@ public class StudentAttendanceService {
 		// 完了メッセージ
 		return messageUtil.getMessage(Constants.PROP_KEY_ATTENDANCE_UPDATE_NOTICE);
 	}
-	
+
 	/**
 	 * 勤怠情報の未入力の判定処理
+	 * @author 大山 忠資 - Task.25
+	 * @param lmsUserId
+	 * @param deleteFlg
+	 * @param trainingDate
 	 * @return true/false
 	 */
 	public Integer getNotEnterCount(Integer lmsUserId, short deleteFlg, Date trainingDate) {
-		
-        //データベースから未入力件数を取得
-        Integer notEnterCount = tStudentAttendanceMapper.notEnterCount(lmsUserId, deleteFlg, trainingDate);
-        
-        return notEnterCount;
+
+		//データベースから未入力件数を取得
+		Integer notEnterCount = tStudentAttendanceMapper.notEnterCount(lmsUserId, deleteFlg, trainingDate);
+
+		return notEnterCount;
 	}
 
 }

@@ -1,6 +1,7 @@
 package jp.co.sss.lms.controller;
 
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +11,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import jakarta.servlet.http.HttpSession;
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
 import jp.co.sss.lms.form.AttendanceForm;
 import jp.co.sss.lms.service.StudentAttendanceService;
+import jp.co.sss.lms.util.AttendanceUtil;
 import jp.co.sss.lms.util.Constants;
 
 /**
@@ -29,6 +32,8 @@ public class AttendanceController {
 	private StudentAttendanceService studentAttendanceService;
 	@Autowired
 	private LoginUserDto loginUserDto;
+	@Autowired
+	AttendanceUtil attendanceUtil;
 
 	/**
 	 * 勤怠管理画面 初期表示
@@ -40,12 +45,31 @@ public class AttendanceController {
 	 * @throws ParseException
 	 */
 	@RequestMapping(path = "/detail", method = RequestMethod.GET)
-	public String index(Model model) {
+	public String index(Model model, HttpSession session) {
 
 		// 勤怠一覧の取得
 		List<AttendanceManagementDto> attendanceManagementDtoList = studentAttendanceService
 				.getAttendanceManagement(loginUserDto.getCourseId(), loginUserDto.getLmsUserId());
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
+		
+		//勤怠情報の未入力の判定結果を取得
+		//セッションのログイン情報を取得
+		loginUserDto = (LoginUserDto) session.getAttribute("loginUserDto");
+		//ログイン情報からlmsユーザーIDを取得
+		Integer lmsUserId = loginUserDto.getLmsUserId();
+		//現在の日付を取得
+        Date trainingDate = attendanceUtil.getTrainingDate();
+        //削除フラグを0に指定
+        short deleteFlg = 0;
+        //勤怠の未入力件数を取得
+        Integer notEnterCount = studentAttendanceService.getNotEnterCount(lmsUserId, deleteFlg, trainingDate);
+      //勤怠の未入力がある場合はture,ない場合はfalse
+        if(notEnterCount>0) {
+        	model.addAttribute("notEnter", true);
+        	
+        }else {
+        	model.addAttribute("notEnter", false);
+        }
 
 		return "attendance/detail";
 	}

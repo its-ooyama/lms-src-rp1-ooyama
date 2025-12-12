@@ -6,6 +6,13 @@
 <title>勤怠情報変更｜LMS</title>
 </head>
 <body>
+	
+	<!-- 勤怠に未入力がある場合のメッセージ -->
+	<th:block th:if="${notEnter}">
+		<script>
+			alert('過去日の勤怠に未入力があります。');
+		</script>
+	</th:block>
 
 	<!-- 完了メッセージ -->
 	<th:block th:if="${not #strings.isEmpty(message)}" id="message">

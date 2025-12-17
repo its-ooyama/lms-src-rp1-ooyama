@@ -2,7 +2,9 @@ package jp.co.sss.lms.controller;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -34,6 +36,8 @@ public class AttendanceController {
 	private LoginUserDto loginUserDto;
 	@Autowired
 	AttendanceUtil attendanceUtil;
+	@Autowired
+	AttendanceManagementDto attendanceManagementDto;
 
 	/**
 	 * 勤怠管理画面 初期表示
@@ -131,6 +135,7 @@ public class AttendanceController {
 	 * @param model
 	 * @return 勤怠情報直接変更画面
 	 */
+	@SuppressWarnings("null")
 	@RequestMapping(path = "/update")
 	public String update(Model model) {
 
@@ -140,6 +145,15 @@ public class AttendanceController {
 		// 勤怠フォームの生成
 		AttendanceForm attendanceForm = studentAttendanceService
 				.setAttendanceForm(attendanceManagementDtoList);
+
+		//大山忠資_Task.26
+		//出勤、退勤時間のマップ(時)を生成
+		LinkedHashMap<Integer, String> hourMap = attendanceUtil.getHourMap();
+		//出勤、退勤時間のマップ(分)を生成
+		LinkedHashMap<Integer, String> minuteMap = attendanceUtil.getMinuteMap();
+		attendanceForm.setHourMap(hourMap);
+		attendanceForm.setMinuteMap(minuteMap);
+
 		model.addAttribute("attendanceForm", attendanceForm);
 
 		return "attendance/update";
@@ -158,6 +172,28 @@ public class AttendanceController {
 	public String complete(AttendanceForm attendanceForm, Model model, BindingResult result)
 			throws ParseException {
 
+		//大山忠資_Task.26
+		for (int i = 0; i < attendanceForm.getAttendanceList().size(); i++) {
+			String trainingStartTimeHour = Objects
+					.toString(attendanceForm.getAttendanceList().get(i).getTrainingStartTimeHour(), "");
+			String trainingStartTimeMinute = Objects
+					.toString(attendanceForm.getAttendanceList().get(i).getTrainingStartTimeMinute(), "");
+			String trainingEndTimeHour = Objects
+					.toString(attendanceForm.getAttendanceList().get(i).getTrainingEndTimeHour(), "");
+			String trainingEndTimeMinute = Objects
+					.toString(attendanceForm.getAttendanceList().get(i).getTrainingEndTimeMinute(), "");
+			//String型に変更した数値を%02dの形に変更する
+			trainingStartTimeHour = addZero(trainingStartTimeHour);
+			trainingStartTimeMinute = addZero(trainingStartTimeMinute);
+			trainingEndTimeHour = addZero(trainingEndTimeHour);
+			trainingEndTimeMinute = addZero(trainingEndTimeMinute);
+			//(時)と(分)を結合する
+			String trainingStartTime = trainingStartTimeHour + trainingStartTimeMinute;
+			String trainingEndTime = trainingEndTimeHour + trainingEndTimeMinute;
+			attendanceForm.getAttendanceList().get(i).setTrainingStartTime(trainingStartTime);
+			attendanceForm.getAttendanceList().get(i).setTrainingEndTime(trainingEndTime);
+		}
+
 		// 更新
 		String message = studentAttendanceService.update(attendanceForm);
 		model.addAttribute("message", message);
@@ -167,6 +203,14 @@ public class AttendanceController {
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
 
 		return "attendance/detail";
+	}
+
+	//String型にした数値を%02dの形にする関数
+	public String addZero(String trainingTime) {
+		if (trainingTime.length() == 1) {
+			trainingTime = "0" + trainingTime;
+		}
+		return trainingTime;
 	}
 
 }

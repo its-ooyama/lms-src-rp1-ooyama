@@ -146,5 +146,81 @@ public class AttendanceUtil {
 		}
 		return false;
 	}
+	
+	/**
+	 * 出勤、退勤時間(時)
+	 * @author 大山忠資-Task.26
+	 * 
+	 * @return  時間(時)
+	 */
+	public LinkedHashMap<Integer, String> getHourMap(){
+		LinkedHashMap<Integer, String> hourMap = new LinkedHashMap<>();
+		hourMap.put(null, "");
+		for (int i = 0; i <24; i++) {
+			hourMap.put(i, String.format("%02d", i));
+		}
+		
+		return hourMap;
+	}
+	
+
+	/**
+	 * 出勤、退勤時間(分)
+	 * @author 大山忠資-Task.26
+	 * 
+	 * @return  時間(分)
+	 */
+	public LinkedHashMap<Integer, String> getMinuteMap(){
+		LinkedHashMap<Integer, String> minuteMap = new LinkedHashMap<>();
+		minuteMap.put(null, "");
+		for (int i = 0; i <60; i++) {
+			minuteMap.put(i, String.format("%02d", i));
+		}
+		
+		return minuteMap;
+	}
+	
+	/**
+	 * 出勤、退勤時間から(時)の切り出し
+	 * @param hourTime
+	 * @return 時間(時)
+	 */
+	public Integer getHour(String hourTime) {
+		Integer hour = null;
+		if(hourTime !=null && !hourTime.isEmpty()) {
+			String hourString = hourTime.substring(0, 2);
+			hour = Integer.parseInt(hourString);
+			return hour;
+		}else {
+			
+			return hour;
+		}
+	}
+	
+	/**
+	 * 出勤、退勤時間から(分)の切り出し
+	 * @param hourTime
+	 * @return 時間(分)
+	 */
+	public Integer getMinute(String minuteTime) {
+		Integer minute = null;
+		if(minuteTime !=null && !minuteTime.isEmpty()) {
+			String minuteString = minuteTime.substring(minuteTime.length()-2);
+			minute = Integer.parseInt(minuteString);
+			return minute;
+		}else {
+			return minute;
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 }

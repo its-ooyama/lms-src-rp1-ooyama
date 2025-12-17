@@ -146,7 +146,7 @@ public class AttendanceController {
 		AttendanceForm attendanceForm = studentAttendanceService
 				.setAttendanceForm(attendanceManagementDtoList);
 
-		//大山忠資_Task.26
+		//大山忠資 - Task.26
 		//出勤、退勤時間のマップ(時)を生成
 		LinkedHashMap<Integer, String> hourMap = attendanceUtil.getHourMap();
 		//出勤、退勤時間のマップ(分)を生成
@@ -172,7 +172,7 @@ public class AttendanceController {
 	public String complete(AttendanceForm attendanceForm, Model model, BindingResult result)
 			throws ParseException {
 
-		//大山忠資_Task.26
+		//大山忠資 - Task.26
 		for (int i = 0; i < attendanceForm.getAttendanceList().size(); i++) {
 			String trainingStartTimeHour = Objects
 					.toString(attendanceForm.getAttendanceList().get(i).getTrainingStartTimeHour(), "");
@@ -183,10 +183,10 @@ public class AttendanceController {
 			String trainingEndTimeMinute = Objects
 					.toString(attendanceForm.getAttendanceList().get(i).getTrainingEndTimeMinute(), "");
 			//String型に変更した数値を%02dの形に変更する
-			trainingStartTimeHour = addZero(trainingStartTimeHour);
-			trainingStartTimeMinute = addZero(trainingStartTimeMinute);
-			trainingEndTimeHour = addZero(trainingEndTimeHour);
-			trainingEndTimeMinute = addZero(trainingEndTimeMinute);
+			trainingStartTimeHour =  studentAttendanceService.addZero(trainingStartTimeHour);
+			trainingStartTimeMinute =  studentAttendanceService.addZero(trainingStartTimeMinute);
+			trainingEndTimeHour =  studentAttendanceService.addZero(trainingEndTimeHour);
+			trainingEndTimeMinute =  studentAttendanceService.addZero(trainingEndTimeMinute);
 			//(時)と(分)を結合する
 			String trainingStartTime = trainingStartTimeHour + trainingStartTimeMinute;
 			String trainingEndTime = trainingEndTimeHour + trainingEndTimeMinute;
@@ -205,12 +205,6 @@ public class AttendanceController {
 		return "attendance/detail";
 	}
 
-	//String型にした数値を%02dの形にする関数
-	public String addZero(String trainingTime) {
-		if (trainingTime.length() == 1) {
-			trainingTime = "0" + trainingTime;
-		}
-		return trainingTime;
-	}
+	
 
 }

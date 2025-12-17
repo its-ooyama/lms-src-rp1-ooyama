@@ -166,7 +166,7 @@ public class AttendanceUtil {
 
 	/**
 	 * 出勤、退勤時間(分)
-	 * @author 大山忠資-Task.26
+	 * @author 大山忠資 - Task.26
 	 * 
 	 * @return  時間(分)
 	 */
@@ -182,6 +182,7 @@ public class AttendanceUtil {
 	
 	/**
 	 * 出勤、退勤時間から(時)の切り出し
+	 * @author 大山忠資 - Task.26
 	 * @param hourTime
 	 * @return 時間(時)
 	 */
@@ -199,6 +200,7 @@ public class AttendanceUtil {
 	
 	/**
 	 * 出勤、退勤時間から(分)の切り出し
+	 * @author 大山忠資 - Task.26
 	 * @param hourTime
 	 * @return 時間(分)
 	 */

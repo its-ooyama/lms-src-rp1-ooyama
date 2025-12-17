@@ -358,5 +358,18 @@ public class StudentAttendanceService {
 
 		return notEnterCount;
 	}
+	
+	/**
+	 * String型の一桁の数値を%02dの形にするメソッド
+	 * @author 大山 忠資 - Task.26
+	 * @param trainingTime
+	 * @return
+	 */
+	public String addZero(String trainingTime) {
+		if (trainingTime.length() == 1) {
+			trainingTime = "0" + trainingTime;
+		}
+		return trainingTime;
+	}
 
 }

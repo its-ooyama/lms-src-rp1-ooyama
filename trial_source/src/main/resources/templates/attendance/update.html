@@ -48,7 +48,7 @@
 								<td class="w140">[[${dailyAttendanceForm.dispTrainingDate}]]</td>
 								<td class="w300">[[${dailyAttendanceForm.sectionName}]]</td>
 								
-								<!--大山忠資_Task.26-->
+								<!--大山忠資 - Task.26-->
 								<td class="w70">
 									<select class="form-control" th:name="|attendanceList[${stat.index}].trainingStartTimeHour|">
 										<option th:each="hour : ${attendanceForm.hourMap}" th:value="${hour.key}" th:text="${hour.value}"
@@ -77,13 +77,13 @@
 								</td>
 								
 								
-								<td class="w80">
+								<td class="w120">
 									<select th:name="|attendanceList[${stat.index}].blankTime|" class="form-control">
 										<option th:each="blankTime : ${attendanceForm.blankTimes}" th:value="${blankTime.key}" th:inline="text" class="form-control" 
 											th:selected="${blankTime.key == dailyAttendanceForm.blankTime}">[[${blankTime.value}]]</option>
 									</select>
 								</td>
-								<td class="w70">[[${dailyAttendanceForm.statusDispName}]]</td>
+								<td class="w90">[[${dailyAttendanceForm.statusDispName}]]</td>
 								<td class="w240">
 									<input type="text" th:name="|attendanceList[${stat.index}].note|" th:value="${dailyAttendanceForm.note}" class="form-control"></input>
 								</td>

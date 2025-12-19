@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -20,6 +21,7 @@ import jp.co.sss.lms.form.AttendanceForm;
 import jp.co.sss.lms.service.StudentAttendanceService;
 import jp.co.sss.lms.util.AttendanceUtil;
 import jp.co.sss.lms.util.Constants;
+import jp.co.sss.lms.util.MessageUtil;
 
 /**
  * 勤怠管理コントローラ
@@ -38,6 +40,8 @@ public class AttendanceController {
 	AttendanceUtil attendanceUtil;
 	@Autowired
 	AttendanceManagementDto attendanceManagementDto;
+	@Autowired
+	MessageUtil messageUtil;
 
 	/**
 	 * 勤怠管理画面 初期表示
@@ -173,9 +177,10 @@ public class AttendanceController {
 			throws ParseException {
 
 		//大山忠資 - Task.26
+		//勤怠フォームに出勤時間、退勤時間をセット
 		for (int i = 0; i < attendanceForm.getAttendanceList().size(); i++) {
 			String trainingStartTimeHour = Objects
-					.toString(attendanceForm.getAttendanceList().get(i).getTrainingStartTimeHour(), "");
+					 .toString(attendanceForm.getAttendanceList().get(i).getTrainingStartTimeHour(), "");
 			String trainingStartTimeMinute = Objects
 					.toString(attendanceForm.getAttendanceList().get(i).getTrainingStartTimeMinute(), "");
 			String trainingEndTimeHour = Objects
@@ -192,6 +197,35 @@ public class AttendanceController {
 			String trainingEndTime = trainingEndTimeHour + trainingEndTimeMinute;
 			attendanceForm.getAttendanceList().get(i).setTrainingStartTime(trainingStartTime);
 			attendanceForm.getAttendanceList().get(i).setTrainingEndTime(trainingEndTime);
+		}
+		
+		//エラー判定
+		for(int i = 0; i < attendanceForm.getAttendanceList().size(); i++) {
+			
+			//備考の入力文字数のチェック(100字以上)
+			
+			//出退勤時間の入力チェック
+			Integer trainingStartTimeHour = attendanceForm.getAttendanceList().get(i).getTrainingStartTimeHour();
+			Integer trainingStartTimeMinute = attendanceForm.getAttendanceList().get(i).getTrainingStartTimeMinute();
+			Integer trainingEndTimeHour = attendanceForm.getAttendanceList().get(i).getTrainingEndTimeHour();
+			Integer trainingEndTimeMinute = attendanceForm.getAttendanceList().get(i).getTrainingEndTimeMinute();
+			if( trainingStartTimeHour == null ^ trainingStartTimeMinute == null) {
+				//result.rejectValue("attendanceList["+i+"].trainingStartTime", messageUtil.getMessage(Constants.VALID_KEY_INPUT_INVALID, new String[] {"出勤時間"}));
+				result.addError(new FieldError("attendanceForm", "attendanceList["+i+"].trainingStartTime", "間違っています。"));
+			}
+			
+			if( trainingEndTimeHour == null ^ trainingEndTimeMinute == null) {
+				//result.rejectValue("attendanceList["+i+"].trainingEndTime", messageUtil.getMessage(Constants.VALID_KEY_INPUT_INVALID, new String[] {"退勤時間"}));
+			}
+		}
+		
+		if(result.hasErrors()) {
+			attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
+			attendanceForm.setHourMap(attendanceUtil.getHourMap());
+			attendanceForm.setMinuteMap(attendanceUtil.getMinuteMap());
+			
+			
+			return "attendance/update";
 		}
 
 		// 更新

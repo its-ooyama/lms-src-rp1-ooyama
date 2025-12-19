@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
 
 import jp.co.sss.lms.dto.AttendanceManagementDto;
 import jp.co.sss.lms.dto.LoginUserDto;
@@ -371,5 +372,33 @@ public class StudentAttendanceService {
 		}
 		return trainingTime;
 	}
+	
+	/**
+	 * 
+	 * @author 大山 忠資 - Task.27
+	 * @param attendanceForm
+	 * @param result
+	 */
+	public void inputErrorCheck(AttendanceForm attendanceForm, BindingResult result) {
+		for(int i = 0; i < attendanceForm.getAttendanceList().size(); i++) {
+					
+			//備考の入力文字数のチェック(100字以上)
+			
+			//出退勤時間の入力チェック
+			Integer trainingStartTimeHour = attendanceForm.getAttendanceList().get(i).getTrainingStartTimeHour();
+			Integer trainingStartTimeMinute = attendanceForm.getAttendanceList().get(i).getTrainingStartTimeMinute();
+			Integer trainingEndTimeHour = attendanceForm.getAttendanceList().get(i).getTrainingEndTimeHour();
+			Integer trainingEndTimeMinute = attendanceForm.getAttendanceList().get(i).getTrainingEndTimeMinute();
+			if( trainingStartTimeHour == null ^ trainingStartTimeMinute == null) {
+				result.rejectValue("attendanceList["+i+"].trainingStartTime", messageUtil.getMessage("input.invalid", new String[] {"出勤時間"}));
+			}
+			
+			if( trainingEndTimeHour == null ^ trainingEndTimeMinute == null) {
+				result.rejectValue("attendanceList[i].trainingEndTime", messageUtil.getMessage("input.invalid", new String[] {"退勤時間"}));
+			}
+		}
+		
+	}
+		
 
 }

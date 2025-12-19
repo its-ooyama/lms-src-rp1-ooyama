@@ -4,13 +4,13 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -63,7 +63,7 @@ public class AttendanceController {
 
 		//大山忠資-Task.25
 		//セッションのログイン情報を取得
-		loginUserDto = (LoginUserDto) session.getAttribute("loginUserDto");
+		//loginUserDto = (LoginUserDto) session.getAttribute("loginUserDto");
 		//ログイン情報からlmsユーザーIDを取得
 		Integer lmsUserId = loginUserDto.getLmsUserId();
 		//現在の日付を取得
@@ -173,49 +173,43 @@ public class AttendanceController {
 	 * @throws ParseException
 	 */
 	@RequestMapping(path = "/update", params = "complete", method = RequestMethod.POST)
-	public String complete(AttendanceForm attendanceForm, Model model, BindingResult result)
+	public String complete(@ModelAttribute AttendanceForm attendanceForm, BindingResult result, Model model)
 			throws ParseException {
 
 		//大山忠資 - Task.26
 		//勤怠フォームに出勤時間、退勤時間をセット
-		for (int i = 0; i < attendanceForm.getAttendanceList().size(); i++) {
-			String trainingStartTimeHour = Objects
-					 .toString(attendanceForm.getAttendanceList().get(i).getTrainingStartTimeHour(), "");
-			String trainingStartTimeMinute = Objects
-					.toString(attendanceForm.getAttendanceList().get(i).getTrainingStartTimeMinute(), "");
-			String trainingEndTimeHour = Objects
-					.toString(attendanceForm.getAttendanceList().get(i).getTrainingEndTimeHour(), "");
-			String trainingEndTimeMinute = Objects
-					.toString(attendanceForm.getAttendanceList().get(i).getTrainingEndTimeMinute(), "");
-			//String型に変更した数値を%02dの形に変更する
-			trainingStartTimeHour =  studentAttendanceService.addZero(trainingStartTimeHour);
-			trainingStartTimeMinute =  studentAttendanceService.addZero(trainingStartTimeMinute);
-			trainingEndTimeHour =  studentAttendanceService.addZero(trainingEndTimeHour);
-			trainingEndTimeMinute =  studentAttendanceService.addZero(trainingEndTimeMinute);
-			//(時)と(分)を結合する
-			String trainingStartTime = trainingStartTimeHour + trainingStartTimeMinute;
-			String trainingEndTime = trainingEndTimeHour + trainingEndTimeMinute;
-			attendanceForm.getAttendanceList().get(i).setTrainingStartTime(trainingStartTime);
-			attendanceForm.getAttendanceList().get(i).setTrainingEndTime(trainingEndTime);
-		}
+		 attendanceForm = studentAttendanceService.clockInOut(attendanceForm);
 		
 		//エラー判定
 		for(int i = 0; i < attendanceForm.getAttendanceList().size(); i++) {
 			
 			//備考の入力文字数のチェック(100字以上)
+			String note = attendanceForm.getAttendanceList().get(i).getNote();
+			if(note.length()>100) {
+				result.addError(new FieldError(result.getObjectName(), "attendanceList["+i+"].note", "間違っています。"));
+			}
+			
 			
 			//出退勤時間の入力チェック
 			Integer trainingStartTimeHour = attendanceForm.getAttendanceList().get(i).getTrainingStartTimeHour();
 			Integer trainingStartTimeMinute = attendanceForm.getAttendanceList().get(i).getTrainingStartTimeMinute();
 			Integer trainingEndTimeHour = attendanceForm.getAttendanceList().get(i).getTrainingEndTimeHour();
 			Integer trainingEndTimeMinute = attendanceForm.getAttendanceList().get(i).getTrainingEndTimeMinute();
-			if( trainingStartTimeHour == null ^ trainingStartTimeMinute == null) {
-				//result.rejectValue("attendanceList["+i+"].trainingStartTime", messageUtil.getMessage(Constants.VALID_KEY_INPUT_INVALID, new String[] {"出勤時間"}));
-				result.addError(new FieldError("attendanceForm", "attendanceList["+i+"].trainingStartTime", "間違っています。"));
+			//出勤時間の(時)が空欄、(分)に値が入っているとき
+			if( trainingStartTimeHour == null && trainingStartTimeMinute != null) {
+				result.addError(new FieldError(result.getObjectName(), "attendanceList["+i+"].trainingStartTimeHour", messageUtil.getMessage("input.invalid", new String[] {"出勤時間"})));
 			}
-			
-			if( trainingEndTimeHour == null ^ trainingEndTimeMinute == null) {
-				//result.rejectValue("attendanceList["+i+"].trainingEndTime", messageUtil.getMessage(Constants.VALID_KEY_INPUT_INVALID, new String[] {"退勤時間"}));
+			//出勤時間の(分)が空欄、(時)に値が入っているとき
+			if( trainingStartTimeHour != null && trainingStartTimeMinute == null) {
+				result.addError(new FieldError(result.getObjectName(), "attendanceList["+i+"].trainingStartTimeMinute", messageUtil.getMessage("input.invalid", new String[] {"出勤時間"})));
+			}
+			//退勤時間の(時)が空欄、(分)に値が入っているとき
+			if( trainingEndTimeHour == null && trainingEndTimeMinute != null) {
+				result.addError(new FieldError(result.getObjectName(), "attendanceList["+i+"].trainingEndTimeHour", messageUtil.getMessage("input.invalid", new String[] {"退勤時間"})));
+			}
+			//退勤時間の(分)が空欄、(時)に値が入っているとき
+			if( trainingEndTimeHour != null && trainingEndTimeMinute == null) {
+				result.addError(new FieldError(result.getObjectName(), "attendanceList["+i+"].trainingStartTimeMinute", messageUtil.getMessage("input.invalid", new String[] {"退勤時間"})));
 			}
 		}
 		
@@ -223,7 +217,6 @@ public class AttendanceController {
 			attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
 			attendanceForm.setHourMap(attendanceUtil.getHourMap());
 			attendanceForm.setMinuteMap(attendanceUtil.getMinuteMap());
-			
 			
 			return "attendance/update";
 		}

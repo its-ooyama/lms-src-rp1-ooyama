@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -345,12 +346,13 @@ public class StudentAttendanceService {
 	}
 
 	/**
-	 * 勤怠情報の未入力の判定処理
+	 * 勤怠情報の未入力の件数
+	 * 
 	 * @author 大山 忠資 - Task.25
 	 * @param lmsUserId
 	 * @param deleteFlg
 	 * @param trainingDate
-	 * @return true/false
+	 * @return Integer
 	 */
 	public Integer getNotEnterCount(Integer lmsUserId, short deleteFlg, Date trainingDate) {
 
@@ -362,6 +364,7 @@ public class StudentAttendanceService {
 	
 	/**
 	 * String型の一桁の数値を%02dの形にするメソッド
+	 * 
 	 * @author 大山 忠資 - Task.26
 	 * @param trainingTime
 	 * @return
@@ -371,6 +374,39 @@ public class StudentAttendanceService {
 			trainingTime = "0" + trainingTime;
 		}
 		return trainingTime;
+	}
+	
+	/**
+	 * (時)と(分)に分割した時刻を結合して勤怠フォームにセットするメソッド
+	 * 
+	 * @author 大山 忠資 - Task.26
+	 * @param attendanceForm
+	 * @return attendanceForm
+	 */
+	public AttendanceForm clockInOut(AttendanceForm attendanceForm) {
+		//勤怠フォームに出勤時間、退勤時間をセット
+		for (int i = 0; i < attendanceForm.getAttendanceList().size(); i++) {
+			String trainingStartTimeHour = Objects
+					 .toString(attendanceForm.getAttendanceList().get(i).getTrainingStartTimeHour(), "");
+			String trainingStartTimeMinute = Objects
+					.toString(attendanceForm.getAttendanceList().get(i).getTrainingStartTimeMinute(), "");
+			String trainingEndTimeHour = Objects
+					.toString(attendanceForm.getAttendanceList().get(i).getTrainingEndTimeHour(), "");
+			String trainingEndTimeMinute = Objects
+					.toString(attendanceForm.getAttendanceList().get(i).getTrainingEndTimeMinute(), "");
+			//String型に変更した数値を%02dの形に変更する
+			trainingStartTimeHour = addZero(trainingStartTimeHour);
+			trainingStartTimeMinute = addZero(trainingStartTimeMinute);
+			trainingEndTimeHour = addZero(trainingEndTimeHour);
+			trainingEndTimeMinute = addZero(trainingEndTimeMinute);
+			//(時)と(分)を結合する
+			String trainingStartTime = trainingStartTimeHour + trainingStartTimeMinute;
+			String trainingEndTime = trainingEndTimeHour + trainingEndTimeMinute;
+			attendanceForm.getAttendanceList().get(i).setTrainingStartTime(trainingStartTime);
+			attendanceForm.getAttendanceList().get(i).setTrainingEndTime(trainingEndTime);
+		}
+		
+		return attendanceForm;
 	}
 	
 	/**

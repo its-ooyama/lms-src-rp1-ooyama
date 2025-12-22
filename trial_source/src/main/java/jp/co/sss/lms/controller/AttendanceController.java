@@ -1,7 +1,6 @@
 package jp.co.sss.lms.controller;
 
 import java.text.ParseException;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -62,16 +60,8 @@ public class AttendanceController {
 		model.addAttribute("attendanceManagementDtoList", attendanceManagementDtoList);
 
 		//大山忠資-Task.25
-		//セッションのログイン情報を取得
-		//loginUserDto = (LoginUserDto) session.getAttribute("loginUserDto");
-		//ログイン情報からlmsユーザーIDを取得
-		Integer lmsUserId = loginUserDto.getLmsUserId();
-		//現在の日付を取得
-		Date trainingDate = attendanceUtil.getTrainingDate();
-		//削除フラグをオフにする
-		short deleteFlg = Constants.DB_FLG_FALSE;
 		//勤怠の未入力件数を取得
-		Integer notEnterCount = studentAttendanceService.getNotEnterCount(lmsUserId, deleteFlg, trainingDate);
+		Integer notEnterCount = studentAttendanceService.getNotEnterCount();
 		//勤怠の未入力がある場合はture,ない場合はfalse
 		if (notEnterCount > 0) {
 			model.addAttribute("notEnter", true);
@@ -178,46 +168,18 @@ public class AttendanceController {
 
 		//大山忠資 - Task.26
 		//勤怠フォームに出勤時間、退勤時間をセット
-		 attendanceForm = studentAttendanceService.clockInOut(attendanceForm);
-		
+		attendanceForm = studentAttendanceService.clockInOut(attendanceForm);
+
+		//大山忠資 - Task.27
 		//エラー判定
-		for(int i = 0; i < attendanceForm.getAttendanceList().size(); i++) {
-			
-			//備考の入力文字数のチェック(100字以上)
-			String note = attendanceForm.getAttendanceList().get(i).getNote();
-			if(note.length()>100) {
-				result.addError(new FieldError(result.getObjectName(), "attendanceList["+i+"].note", "間違っています。"));
-			}
-			
-			
-			//出退勤時間の入力チェック
-			Integer trainingStartTimeHour = attendanceForm.getAttendanceList().get(i).getTrainingStartTimeHour();
-			Integer trainingStartTimeMinute = attendanceForm.getAttendanceList().get(i).getTrainingStartTimeMinute();
-			Integer trainingEndTimeHour = attendanceForm.getAttendanceList().get(i).getTrainingEndTimeHour();
-			Integer trainingEndTimeMinute = attendanceForm.getAttendanceList().get(i).getTrainingEndTimeMinute();
-			//出勤時間の(時)が空欄、(分)に値が入っているとき
-			if( trainingStartTimeHour == null && trainingStartTimeMinute != null) {
-				result.addError(new FieldError(result.getObjectName(), "attendanceList["+i+"].trainingStartTimeHour", messageUtil.getMessage("input.invalid", new String[] {"出勤時間"})));
-			}
-			//出勤時間の(分)が空欄、(時)に値が入っているとき
-			if( trainingStartTimeHour != null && trainingStartTimeMinute == null) {
-				result.addError(new FieldError(result.getObjectName(), "attendanceList["+i+"].trainingStartTimeMinute", messageUtil.getMessage("input.invalid", new String[] {"出勤時間"})));
-			}
-			//退勤時間の(時)が空欄、(分)に値が入っているとき
-			if( trainingEndTimeHour == null && trainingEndTimeMinute != null) {
-				result.addError(new FieldError(result.getObjectName(), "attendanceList["+i+"].trainingEndTimeHour", messageUtil.getMessage("input.invalid", new String[] {"退勤時間"})));
-			}
-			//退勤時間の(分)が空欄、(時)に値が入っているとき
-			if( trainingEndTimeHour != null && trainingEndTimeMinute == null) {
-				result.addError(new FieldError(result.getObjectName(), "attendanceList["+i+"].trainingStartTimeMinute", messageUtil.getMessage("input.invalid", new String[] {"退勤時間"})));
-			}
-		}
-		
-		if(result.hasErrors()) {
+		studentAttendanceService.inputErrorCheck(attendanceForm, result);
+
+		//入力チェックでエラーが起きた時の処理
+		if (result.hasErrors()) {
 			attendanceForm.setBlankTimes(attendanceUtil.setBlankTime());
 			attendanceForm.setHourMap(attendanceUtil.getHourMap());
 			attendanceForm.setMinuteMap(attendanceUtil.getMinuteMap());
-			
+
 			return "attendance/update";
 		}
 
@@ -231,7 +193,5 @@ public class AttendanceController {
 
 		return "attendance/detail";
 	}
-
-	
 
 }

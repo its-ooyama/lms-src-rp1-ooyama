@@ -38,6 +38,7 @@
 						<tr>
 							<th class="w140">日付</th>
 							<th class="w300">コース内容</th>
+							<th></th>
 							<th class="w180" colspan="3">出勤</th>
 						    <th class="w180" colspan="3">退勤</th>
 							<th class="w80">中抜け時間</th>
@@ -59,36 +60,40 @@
 								<td class="w140">[[${dailyAttendanceForm.dispTrainingDate}]]</td>
 								<td class="w300">[[${dailyAttendanceForm.sectionName}]]</td>
 								
+								<!--大山忠資 - Task.28-->
+								<td>
+									<button type="button" class="btn btn-success default-button" th:onclick="workingButton([[${stat.index}]])">定時</button>
+								</td>
 								<!--大山忠資 - Task.26-->
-								<td class="w70">
-									<select class="form-control" th:name="|attendanceList[${stat.index}].trainingStartTimeHour|"  th:errorclass="errorInput">
+								<td class="w80">
+									<select th:id="|trainingStartTimeHour_${stat.index}|" class="form-control" th:name="|attendanceList[${stat.index}].trainingStartTimeHour|"  th:errorclass="errorInput">
 										<option th:each="hour : ${attendanceForm.hourMap}" th:value="${hour.key}" th:text="${hour.value}"
 										 th:selected="${hour.key == dailyAttendanceForm.trainingStartTimeHour}"></option>
 									</select>
 								</td>
 								<td>:</td>
-								<td class="w70">
-									<select class="form-control" th:name="|attendanceList[${stat.index}].trainingStartTimeMinute|" th:errorclass="errorInput">
+								<td class="w80">
+									<select th:id="|trainingStartTimeMinute_${stat.index}|" class="form-control" th:name="|attendanceList[${stat.index}].trainingStartTimeMinute|" th:errorclass="errorInput">
 										<option th:each="minute : ${attendanceForm.minuteMap}" th:value="${minute.key}" th:text="${minute.value}"
 										 th:selected="${minute.key == dailyAttendanceForm.trainingStartTimeMinute}"></option>
 									</select>
 								</td>
-								<td class="w70">
-									<select  class="form-control" th:name="|attendanceList[${stat.index}].trainingEndTimeHour|"  th:errorclass="errorInput">
+								<td class="w80">
+									<select th:id="|trainingEndTimeHour_${stat.index}|" class="form-control" th:name="|attendanceList[${stat.index}].trainingEndTimeHour|"  th:errorclass="errorInput">
 										<option th:each="hour : ${attendanceForm.hourMap}" th:value="${hour.key}" th:text="${hour.value}"
 										  th:selected="${hour.key == dailyAttendanceForm.trainingEndTimeHour}"></option>
 									</select>
 								</td>
 								<td>:</td>
-								<td class="w70">
-									<select class="form-control" th:name="|attendanceList[${stat.index}].trainingEndTimeMinute|" th:errorclass="errorInput">
+								<td class="w80">
+									<select th:id="|trainingEndTimeMinute_${stat.index}|" class="form-control" th:name="|attendanceList[${stat.index}].trainingEndTimeMinute|" th:errorclass="errorInput">
 										<option th:each="minute : ${attendanceForm.minuteMap}" th:value="${minute.key}" th:text="${minute.value}"
 										th:selected="${minute.key == dailyAttendanceForm.trainingEndTimeMinute}"></option>
 									</select>
 								</td>
 								
 								
-								<td class="w120">
+								<td class="w140">
 									<select th:name="|attendanceList[${stat.index}].blankTime|" class="form-control" th:errorclass="errorInput">
 										<option th:each="blankTime : ${attendanceForm.blankTimes}" th:value="${blankTime.key}" th:inline="text" class="form-control" 
 											th:selected="${blankTime.key == dailyAttendanceForm.blankTime}">[[${blankTime.value}]]</option>
@@ -113,19 +118,32 @@
 					<input type="submit" value="更新" name="complete" class="btn btn-info" onclick="return confirmUpdate()"/>
 				</div>
 			</form>
-			
-			<!--大山忠資-Task.27-->
-			<script>
-				function confirmUpdate() {
-				    if (confirm("更新します。よろしいですか？")) {
-				        return true;
-				    } else {
-				        return false;
-				    }
-				}
-			</script>
 		</div>
 	</div>
+	
+	<script>
+		/*大山忠資-Task.27*/
+		function confirmUpdate() {
+		    if (confirm("更新します。よろしいですか？")) {
+		        return true;
+		    } else {
+		        return false;
+		    }
+		}
+				
+		/*大山忠資-Task.28*/
+		function workingButton(index) {
+			const trainingStartTimeHour = document.getElementById(`trainingStartTimeHour_${index}`);
+			const trainingStartTimeMinute = document.getElementById(`trainingStartTimeMinute_${index}`);
+			const trainingEndTimeHour = document.getElementById(`trainingEndTimeHour_${index}`);
+			const trainingEndTimeMinute = document.getElementById(`trainingEndTimeMinute_${index}`);
+		
+    		trainingStartTimeHour.value = '9';
+    		trainingStartTimeMinute.value = '0';
+    		trainingEndTimeHour.value = '18';
+    		trainingEndTimeMinute.value = '0';
+		}
+	</script>
 
 </body>
 </html>

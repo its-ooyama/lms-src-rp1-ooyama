@@ -149,7 +149,7 @@ public class AttendanceController {
 		attendanceForm.setMinuteMap(minuteMap);
 
 		model.addAttribute("attendanceForm", attendanceForm);
-
+		
 		return "attendance/update";
 	}
 
